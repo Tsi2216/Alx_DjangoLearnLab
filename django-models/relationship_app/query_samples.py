@@ -1,7 +1,3 @@
-# To run this script, you must first set up the Django environment.
-# You can do this by running it within a Django shell: `python manage.py shell`
-# Then, import and execute the functions from this file.
-
 from relationship_app.models import Author, Book, Library, Librarian
 
 def query_books_by_author(author_name):
@@ -56,10 +52,3 @@ def create_sample_data():
     librarian1, created = Librarian.objects.get_or_create(name="Alice Johnson", library=library1)
     librarian2, created = Librarian.objects.get_or_create(name="Bob Williams", library=library2)
     print("Sample data created successfully.")
-
-if __name__ == '__main__':
-    # You must run this within the Django shell: `python manage.py shell`
-    # or configure the script to run independently with `django.setup()`
-    # Let's assume we are in the shell for these examples.
-    print("Run `create_sample_data()` first to populate the database.")
-    print("Then call the query functions, e.g., `query_books_by_author('Jane Austen')`.")
