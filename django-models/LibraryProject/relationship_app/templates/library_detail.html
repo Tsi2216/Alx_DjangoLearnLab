@@ -8,13 +8,9 @@
     <h1>Library: {{ library.name }}</h1>
     <h2>Books in Library:</h2>
     <ul>
-        {% if library.books.all %}
-            {% for book in library.books.all %}
-                <li>{{ book.title }} by {{ book.author.name }}</li>
-            {% endfor %}
-        {% else %}
-            <li>No books available in this library.</li>
-        {% endif %}
+        {% for book in library.books.all %}
+        <li>{{ book.title }} by {{ book.author.name }}</li>
+        {% endfor %}
     </ul>
 </body>
 </html>
