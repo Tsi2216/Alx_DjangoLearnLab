@@ -1,10 +1,14 @@
-from django.contrib.auth.decorators import user_passes_test
 from django.shortcuts import render
-from .models import UserProfile
+from django.views.generic.detail import DetailView
+from .models import Library
 
-def is_admin(user):
-    return user.is_authenticated and user.userprofile.role == 'Admin'
+# Function-Based View
+def list_books(request):
+    books = Book.objects.all()  # Fetch all Book objects from the database
+    return render(request, 'relationship_app/list_books.html', {'books': books})
 
-@user_passes_test(is_admin)
-def admin_view(request):
-    return render(request, 'admin_view.html')
+# Class-Based View
+class LibraryDetailView(DetailView):
+    model = Library  # Specifies the model to use
+    template_name = 'relationship_app/library_detail.html'  # Template to render
+    context_object_name = 'library'  # Name of the object in the template context
