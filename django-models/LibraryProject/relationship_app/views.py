@@ -1,6 +1,6 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.views.generic.detail import DetailView
-from .models import Library
+from .models import Library, Book
 from django.contrib.auth import login
 from django.contrib.auth.forms import UserCreationForm
 
@@ -25,3 +25,24 @@ class LibraryDetailView(DetailView):
     model = Library
     template_name = 'relationship_app/library_detail.html'
     context_object_name = 'library'
+    
+
+def register(request):
+    """
+    Function-based view to handle user registration.
+
+    This view uses Django's UserCreationForm to create a new user.
+    If the form is valid, it saves the user, logs them in, and redirects.
+    Otherwise, it displays the form for the user to fill out.
+    """
+    if request.method == 'POST':
+        form = UserCreationForm(request.POST)
+        if form.is_valid():
+            user = form.save()
+            login(request, user)
+            return redirect('relationship_app:books-list')  # Redirect to the books list page
+    else:
+        form = UserCreationForm()
+    
+    context = {'form': form}
+    return render(request, 'relationship_app/register.html', context)
