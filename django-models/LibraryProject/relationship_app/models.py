@@ -1,34 +1,48 @@
 from django.db import models
 
-# Create your models here.
+class Author(models.Model):
+    """
+    The Author model represents a person who writes books.
+    It has a single CharField for the author's name.
+    """
+    name = models.CharField(max_length=100)
+
+    def __str__(self):
+        return self.name
+
+class Book(models.Model):
+    """
+    The Book model represents a single publication.
+    It has a title and a ForeignKey relationship to an Author.
+    This establishes a one-to-many relationship: one author can have many books.
+    """
+    title = models.CharField(max_length=200)
+    author = models.ForeignKey(Author, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return self.title
 
 class Library(models.Model):
     """
-    A model to represent a library building or institution.
+    The Library model represents a collection of books.
+    It has a ManyToManyField relationship to the Book model,
+    meaning a library can have many books, and a book can be in many libraries.
     """
-    name = models.CharField(max_length=200, help_text="The name of the library.")
-    location = models.CharField(max_length=200, help_text="The location of the library.")
+    name = models.CharField(max_length=200)
+    books = models.ManyToManyField(Book)
 
     def __str__(self):
-        """
-        Returns the string representation of the Library object.
-        """
         return self.name
 
 class Librarian(models.Model):
     """
-    A model to represent a librarian working at a specific library.
-    
-    This class includes a ForeignKey to link a librarian to a Library instance.
-    The on_delete=models.CASCADE ensures that if a Library is deleted,
-    all associated Librarian records are also deleted.
+    The Librarian model represents an employee.
+    It has a OneToOneField relationship to the Library model,
+    meaning a librarian is uniquely assigned to one library, and each library
+    has a single librarian.
     """
-    name = models.CharField(max_length=100, help_text="The name of the librarian.")
-    library = models.ForeignKey(Library, on_delete=models.CASCADE, help_text="The library where the librarian works.")
-    employee_id = models.CharField(max_length=50, unique=True, help_text="The unique employee ID of the librarian.")
-    
+    name = models.CharField(max_length=100)
+    library = models.OneToOneField(Library, on_delete=models.CASCADE)
+
     def __str__(self):
-        """
-        Returns the string representation of the Librarian object.
-        """
-        return f"{self.name} ({self.library.name})"
+        return self.name
