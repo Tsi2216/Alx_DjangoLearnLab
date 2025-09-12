@@ -2,34 +2,33 @@ from django.db import models
 
 # Create your models here.
 
-class Author(models.Model):
+class Library(models.Model):
     """
-    A model to represent a book's author.
-    
-    This class defines the fields for an Author, such as their name.
-    The `__str__` method is overridden to provide a human-readable representation
-    of the object, which is useful in the Django admin interface.
+    A model to represent a library building or institution.
     """
-    name = models.CharField(max_length=100, help_text="The name of the author.")
+    name = models.CharField(max_length=200, help_text="The name of the library.")
+    location = models.CharField(max_length=200, help_text="The location of the library.")
 
     def __str__(self):
         """
-        Returns the string representation of the Author object.
+        Returns the string representation of the Library object.
         """
         return self.name
 
-class Book(models.Model):
+class Librarian(models.Model):
     """
-    A model to represent a book.
+    A model to represent a librarian working at a specific library.
     
-    This class includes a ForeignKey field to link a book to its author.
+    This class includes a ForeignKey to link a librarian to a Library instance.
+    The on_delete=models.CASCADE ensures that if a Library is deleted,
+    all associated Librarian records are also deleted.
     """
-    title = models.CharField(max_length=200, help_text="The title of the book.")
-    author = models.ForeignKey(Author, on_delete=models.CASCADE, help_text="The author of the book.")
-    publication_date = models.DateField(null=True, blank=True)
-
+    name = models.CharField(max_length=100, help_text="The name of the librarian.")
+    library = models.ForeignKey(Library, on_delete=models.CASCADE, help_text="The library where the librarian works.")
+    employee_id = models.CharField(max_length=50, unique=True, help_text="The unique employee ID of the librarian.")
+    
     def __str__(self):
         """
-        Returns the string representation of the Book object.
+        Returns the string representation of the Librarian object.
         """
-        return self.title
+        return f"{self.name} ({self.library.name})"
