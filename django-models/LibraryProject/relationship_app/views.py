@@ -45,4 +45,8 @@ def register(request):
         form = UserCreationForm()
     
     context = {'form': form}
+<<<<<<< HEAD
     return render(request, 'relationship_app/register.html', context)
+=======
+    return render(request, 'relationship_app/register.html', context)
+>>>>>>> a51ff18aeaafd880c900d5b5beea8453bee117dd
