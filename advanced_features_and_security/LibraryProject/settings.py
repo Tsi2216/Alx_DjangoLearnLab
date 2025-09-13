@@ -37,6 +37,8 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     # Add your apps here
+    'relationship_app',
+    'bookshelf',
 ]
 
 MIDDLEWARE = [
@@ -121,8 +123,8 @@ STATIC_URL = '/static/'
 
 # Uncomment these for production
 STATIC_ROOT = BASE_DIR / 'staticfiles'  # Directory for collected static files
-MEDIA_URL = '/media/'                     # URL for user-uploaded files
-MEDIA_ROOT = BASE_DIR / 'media'           # Directory for user-uploaded files
+MEDIA_URL = '/media/'                  # URL for user-uploaded files
+MEDIA_ROOT = BASE_DIR / 'media'            # Directory for user-uploaded files
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
@@ -131,3 +133,4 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # Use environment variables for sensitive data
 # Ensure to set these in your .env file
+AUTH_USER_MODEL = 'relationship_app.CustomUser'
