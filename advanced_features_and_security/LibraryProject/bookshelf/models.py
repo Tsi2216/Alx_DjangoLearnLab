@@ -1,4 +1,3 @@
-# bookshelf/models.py
 from django.db import models
 from relationship_app.models import CustomUser  # Ensure this import is correct
 
