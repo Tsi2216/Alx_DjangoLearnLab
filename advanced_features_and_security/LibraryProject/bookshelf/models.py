@@ -1,6 +1,6 @@
 # bookshelf/models.py
 from django.db import models
-from relationship_app.models import CustomUser  # Import your custom user model
+from relationship_app.models import CustomUser  # Ensure this import is correct
 
 class Book(models.Model):
     title = models.CharField(max_length=200)
