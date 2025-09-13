@@ -1,28 +1,48 @@
 from django.shortcuts import render, redirect
+from django.views.generic.detail import DetailView
+from .models import Library, Book
 from django.contrib.auth import login
 from django.contrib.auth.forms import UserCreationForm
-from django.views.generic import DetailView
-from .models import Book, Library
 
-# Function-Based View for listing books
 def list_books(request):
-    books = Book.objects.all()  # Fetch all Book objects from the database
+    """
+    Function-based view to display a list of all books.
+    
+    This view fetches all Book objects from the database and passes them
+    to the 'list_books.html' template for rendering.
+    """
+    books = Book.objects.all()
     return render(request, 'relationship_app/list_books.html', {'books': books})
 
-# Class-Based View for Library Details
-class LibraryDetailView(DetailView):
-    model = Library  # Specifies the model to use
-    template_name = 'relationship_app/library_detail.html'  # Template to render
-    context_object_name = 'library'  # Name of the object in the template context
 
-# Function-Based View for User Registration
+class LibraryDetailView(DetailView):
+    """
+    Class-based view to display details of a specific library.
+    
+    This view automatically fetches a Library object based on the primary key
+    (pk) in the URL and passes it to the 'library_detail.html' template.
+    """
+    model = Library
+    template_name = 'relationship_app/library_detail.html'
+    context_object_name = 'library'
+    
+
 def register(request):
+    """
+    Function-based view to handle user registration.
+
+    This view uses Django's UserCreationForm to create a new user.
+    If the form is valid, it saves the user, logs them in, and redirects.
+    Otherwise, it displays the form for the user to fill out.
+    """
     if request.method == 'POST':
         form = UserCreationForm(request.POST)
         if form.is_valid():
             user = form.save()
-            login(request, user)  # Log the user in after registration
-            return redirect('list_books')  # Redirect to the books list after registration
+            login(request, user)
+            return redirect('relationship_app:books-list')  # Redirect to the books list page
     else:
         form = UserCreationForm()
-    return render(request, 'relationship_app/register.html', {'form': form})
+    
+    context = {'form': form}
+    return render(request, 'relationship_app/register.html', context)

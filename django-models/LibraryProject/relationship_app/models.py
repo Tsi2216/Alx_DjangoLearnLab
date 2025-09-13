@@ -1,35 +1,48 @@
 from django.db import models
 
-# Create your models here.
-
 class Author(models.Model):
     """
-    A model to represent a book's author.
-    
-    This class defines the fields for an Author, such as their name.
-    The `__str__` method is overridden to provide a human-readable representation
-    of the object, which is useful in the Django admin interface.
+    The Author model represents a person who writes books.
+    It has a single CharField for the author's name.
     """
-    name = models.CharField(max_length=100, help_text="The name of the author.")
+    name = models.CharField(max_length=100)
 
     def __str__(self):
-        """
-        Returns the string representation of the Author object.
-        """
         return self.name
 
 class Book(models.Model):
     """
-    A model to represent a book.
-    
-    This class includes a ForeignKey field to link a book to its author.
+    The Book model represents a single publication.
+    It has a title and a ForeignKey relationship to an Author.
+    This establishes a one-to-many relationship: one author can have many books.
     """
-    title = models.CharField(max_length=200, help_text="The title of the book.")
-    author = models.ForeignKey(Author, on_delete=models.CASCADE, help_text="The author of the book.")
-    publication_date = models.DateField(null=True, blank=True)
+    title = models.CharField(max_length=200)
+    author = models.ForeignKey(Author, on_delete=models.CASCADE)
 
     def __str__(self):
-        """
-        Returns the string representation of the Book object.
-        """
         return self.title
+
+class Library(models.Model):
+    """
+    The Library model represents a collection of books.
+    It has a ManyToManyField relationship to the Book model,
+    meaning a library can have many books, and a book can be in many libraries.
+    """
+    name = models.CharField(max_length=200)
+    books = models.ManyToManyField(Book)
+
+    def __str__(self):
+        return self.name
+
+class Librarian(models.Model):
+    """
+    The Librarian model represents an employee.
+    It has a OneToOneField relationship to the Library model,
+    meaning a librarian is uniquely assigned to one library, and each library
+    has a single librarian.
+    """
+    name = models.CharField(max_length=100)
+    library = models.OneToOneField(Library, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return self.name
