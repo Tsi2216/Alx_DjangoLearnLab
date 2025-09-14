@@ -116,27 +116,28 @@ MEDIA_ROOT = BASE_DIR / 'media'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # Custom User Model
-AUTH_USER_MODEL = 'bookshelf.CustomUser' # Corrected path to point to your app
+AUTH_USER_MODEL = 'bookshelf.CustomUser' # Corrected path to point to your bookshelf app
 
 # --- Security Enhancements ---
-# Secure Cookies
+# Secure Cookies: Ensures cookies are only sent over HTTPS.
 CSRF_COOKIE_SECURE = True
 SESSION_COOKIE_SECURE = True
 
-# Enforce HSTS
-SECURE_HSTS_SECONDS = 31536000
+# Enforce HTTPS: Redirects all HTTP traffic to HTTPS.
+# Important: Only use this in a production environment with a valid SSL certificate.
+SECURE_SSL_REDIRECT = True
+
+# HSTS (HTTP Strict Transport Security): Tells browsers to only use HTTPS.
+SECURE_HSTS_SECONDS = 31536000  # 1 year
 SECURE_HSTS_INCLUDE_SUBDOMAINS = True
 SECURE_HSTS_PRELOAD = True
 
-# Redirect all HTTP traffic to HTTPS
-SECURE_SSL_REDIRECT = True
-
-# Browser-side protections
+# Browser-side protections against XSS and clickjacking.
 SECURE_BROWSER_XSS_FILTER = True
 X_FRAME_OPTIONS = 'DENY'
 SECURE_CONTENT_TYPE_NOSNIFF = True
 
-# Content Security Policy (CSP) headers - requires django-csp
+# Optional Content Security Policy (CSP) headers - requires django-csp package
 # MIDDLEWARE.insert(0, 'csp.middleware.CSPMiddleware')
 # CSP_DEFAULT_SRC = ("'self'",)
 # CSP_SCRIPT_SRC = ("'self'",)
