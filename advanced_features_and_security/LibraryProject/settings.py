@@ -16,7 +16,6 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = config('DJANGO_SECRET_KEY', default='django-insecure-g4q8c=)!=5s&k)chf#z3!xqedd6vc!)=#rzm@)!3gm0#l0nf4i')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-# Set DEBUG to False in production for security.
 DEBUG = config('DJANGO_DEBUG', default='False') == 'True'
 
 ALLOWED_HOSTS = config('DJANGO_ALLOWED_HOSTS', default='').split(',')
@@ -42,7 +41,7 @@ MIDDLEWARE = [
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
-    'django.middleware.clickjacking.XFrameOptionsMiddleware', # Handles X_FRAME_OPTIONS
+    'django.middleware.clickjacking.XFrameOptionsMiddleware',  # Handles X_FRAME_OPTIONS
 ]
 
 ROOT_URLCONF = 'LibraryProject.urls'
@@ -65,8 +64,6 @@ TEMPLATES = [
 WSGI_APPLICATION = 'LibraryProject.wsgi.application'
 
 # Database
-# https://docs.djangoproject.com/en/5.2/ref/settings/#databases
-
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
@@ -75,8 +72,6 @@ DATABASES = {
 }
 
 # Password validation
-# https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
-
 AUTH_PASSWORD_VALIDATORS = [
     {
         'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
@@ -96,24 +91,18 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 # Internationalization
-# https://docs.djangoproject.com/en/5.2/topics/i18n/
-
 LANGUAGE_CODE = 'en-us'
 TIME_ZONE = 'UTC'
 USE_I18N = True
 USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/5.2/howto/static-files/
-
 STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
 # Default primary key field type
-# https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
-
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # Custom User Model
@@ -121,32 +110,23 @@ AUTH_USER_MODEL = 'bookshelf.CustomUser'
 
 # --- Security Enhancements ---
 # Step 1: Secure Settings
-# 
+
 # 1. Enforce HTTPS.
-# Redirects all HTTP requests to HTTPS. Requires a properly configured SSL/TLS certificate.
-SECURE_SSL_REDIRECT = True
-# HSTS tells browsers to only access the site via HTTPS for a specified time.
-SECURE_HSTS_SECONDS = 31536000  # 1 year
+SECURE_SSL_REDIRECT = True  # Redirects all HTTP requests to HTTPS
+SECURE_HSTS_SECONDS = 31536000  # HSTS: 1 year
 SECURE_HSTS_INCLUDE_SUBDOMAINS = True
 SECURE_HSTS_PRELOAD = True
 
 # 2. Enforce Secure Cookies.
-# Ensures session cookies are only transmitted over HTTPS.
-SESSION_COOKIE_SECURE = True
-# Ensures CSRF cookies are only transmitted over HTTPS.
-CSRF_COOKIE_SECURE = True
+SESSION_COOKIE_SECURE = True  # Ensure session cookies are only sent over HTTPS
+CSRF_COOKIE_SECURE = True  # Ensure CSRF cookies are only sent over HTTPS
 
 # 3. Implement Secure Headers.
-# Prevents the site from being framed, protecting against clickjacking attacks.
-X_FRAME_OPTIONS = 'DENY'
-# Prevents browsers from MIME-sniffing and helps mitigate certain XSS attacks.
-SECURE_CONTENT_TYPE_NOSNIFF = True
-# Enables the browser’s built-in XSS filtering.
-SECURE_BROWSER_XSS_FILTER = True
+X_FRAME_OPTIONS = 'DENY'  # Prevents clickjacking
+SECURE_CONTENT_TYPE_NOSNIFF = True  # Prevents MIME-sniffing
+SECURE_BROWSER_XSS_FILTER = True  # Enables built-in XSS filtering
 
 # Step 4: Implement Content Security Policy (CSP)
-# A strong CSP helps prevent a wide range of attacks, including XSS.
-# You typically use a separate package like `django-csp`.
 # Uncomment the following lines after installing `django-csp` (`pip install django-csp`).
 # MIDDLEWARE.insert(0, 'csp.middleware.CSPMiddleware')
 # CSP_DEFAULT_SRC = ("'self'",)
