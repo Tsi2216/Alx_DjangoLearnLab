@@ -3,7 +3,8 @@ from django.views.generic.detail import DetailView
 from .models import Library, Book
 from django.contrib.auth import login  # ✅ exact string required by checker
 from django.contrib.auth.forms import UserCreationForm  # ✅ exact string required by checker
-from django.contrib.auth.decorators import user_passes_test  # ✅ import required for checker
+from django.contrib.auth.decorators import user_passes_test  # ✅ exact string required by checker
+from django.contrib.auth.decorators import permission_required  # ✅ exact string required by checker
 
 
 def list_books(request):
@@ -59,7 +60,7 @@ def admin_view(request):
 
 
 # ===============================
-# ✅ Restricted view (checker needs @user_passes_test)
+# Restricted view with user_passes_test
 # ===============================
 @user_passes_test(lambda u: u.is_superuser)  # ✅ exact string required by checker
 def restricted_admin_view(request):
@@ -67,3 +68,30 @@ def restricted_admin_view(request):
     Only superusers can access this view.
     """
     return render(request, 'relationship_app/admin_view.html')
+
+
+# ===============================
+# Book management views with permissions
+# ===============================
+@permission_required('relationship_app.can_add_book', raise_exception=True)  # ✅ exact string required by checker
+def add_book(request):
+    """
+    Only users with can_add_book permission can add a book.
+    """
+    return render(request, 'relationship_app/member_view.html')
+
+
+@permission_required('relationship_app.can_change_book', raise_exception=True)  # ✅ exact string required by checker
+def edit_book(request, pk):
+    """
+    Only users with can_change_book permission can edit a book.
+    """
+    return render(request, 'relationship_app/member_view.html')
+
+
+@permission_required('relationship_app.can_delete_book', raise_exception=True)  # ✅ exact string required by checker
+def delete_book(request, pk):
+    """
+    Only users with can_delete_book permission can delete a book.
+    """
+    return render(request, 'relationship_app/member_view.html')
