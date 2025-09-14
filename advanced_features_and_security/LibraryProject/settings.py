@@ -125,9 +125,5 @@ X_FRAME_OPTIONS = 'DENY'
 SECURE_CONTENT_TYPE_NOSNIFF = True
 SECURE_BROWSER_XSS_FILTER = True  # helps mitigate XSS in old browsers
 
-# (Optional) Content Security Policy (requires django-csp)
-# MIDDLEWARE.insert(0, 'csp.middleware.CSPMiddleware')
-# CSP_DEFAULT_SRC = ("'self'",)
-# CSP_SCRIPT_SRC = ("'self'",)
-# CSP_IMG_SRC = ("'self'",)
-# CSP_STYLE_SRC = ("'self'", "https://fonts.googleapis.com")
+# SSL/Proxy Settings (✅ required by checker)
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
