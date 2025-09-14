@@ -13,7 +13,10 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = config('DJANGO_SECRET_KEY', default='django-insecure-g4q8c=)!=5s&k)chf#z3!xqedd6vc!)=#rzm@)!3gm0#l0nf4i')
+SECRET_KEY = config(
+    'DJANGO_SECRET_KEY',
+    default='django-insecure-g4q8c=)!=5s&k)chf#z3!xqedd6vc!)=#rzm@)!3gm0#l0nf4i'
+)
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = config('DJANGO_DEBUG', default='False') == 'True'
@@ -28,20 +31,21 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    # Add your apps here
+
+    # Custom apps
     'relationship_app',
     'bookshelf',
 ]
 
-# Middleware order is important for security. SecurityMiddleware should be at the top.
+# Middleware (SecurityMiddleware should be first)
 MIDDLEWARE = [
-    'django.middleware.security.SecurityMiddleware',  # Handles secure redirects and headers
+    'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
-    'django.middleware.clickjacking.XFrameOptionsMiddleware',  # Handles X_FRAME_OPTIONS
+    'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
 ROOT_URLCONF = 'LibraryProject.urls'
@@ -73,21 +77,13 @@ DATABASES = {
 
 # Password validation
 AUTH_PASSWORD_VALIDATORS = [
-    {
-        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
-    },
+    {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
     {
         'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
-        'OPTIONS': {
-            'min_length': 8,
-        }
+        'OPTIONS': {'min_length': 8},
     },
-    {
-        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
-    },
+    {'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator'},
+    {'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator'},
 ]
 
 # Internationalization
@@ -96,7 +92,7 @@ TIME_ZONE = 'UTC'
 USE_I18N = True
 USE_TZ = True
 
-# Static files (CSS, JavaScript, Images)
+# Static and Media
 STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 MEDIA_URL = '/media/'
@@ -108,26 +104,28 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # Custom User Model
 AUTH_USER_MODEL = 'bookshelf.CustomUser'
 
-# --- Security Enhancements ---
-# Step 1: Secure Settings
+# ===============================
+# 🔒 Security Enhancements
+# ===============================
 
-# 1. Enforce HTTPS.
-SECURE_SSL_REDIRECT = True  # Redirects all HTTP requests to HTTPS
-SECURE_HSTS_SECONDS = 31536000  # HSTS: 1 year
+# Enforce HTTPS
+SECURE_SSL_REDIRECT = True
+
+# HSTS (HTTP Strict Transport Security)
+SECURE_HSTS_SECONDS = 31536000  # 1 year
 SECURE_HSTS_INCLUDE_SUBDOMAINS = True
 SECURE_HSTS_PRELOAD = True
 
-# 2. Enforce Secure Cookies.
-SESSION_COOKIE_SECURE = True  # Ensure session cookies are only sent over HTTPS
-CSRF_COOKIE_SECURE = True  # Ensure CSRF cookies are only sent over HTTPS
+# Secure Cookies
+SESSION_COOKIE_SECURE = True
+CSRF_COOKIE_SECURE = True
 
-# 3. Implement Secure Headers.
-X_FRAME_OPTIONS = 'DENY'  # Prevents clickjacking
-SECURE_CONTENT_TYPE_NOSNIFF = True  # Prevents MIME-sniffing
-SECURE_BROWSER_XSS_FILTER = True  # Enables built-in XSS filtering
+# Security Headers
+X_FRAME_OPTIONS = 'DENY'
+SECURE_CONTENT_TYPE_NOSNIFF = True
+SECURE_BROWSER_XSS_FILTER = True  # helps mitigate XSS in old browsers
 
-# Step 4: Implement Content Security Policy (CSP)
-# Uncomment the following lines after installing `django-csp` (`pip install django-csp`).
+# (Optional) Content Security Policy (requires django-csp)
 # MIDDLEWARE.insert(0, 'csp.middleware.CSPMiddleware')
 # CSP_DEFAULT_SRC = ("'self'",)
 # CSP_SCRIPT_SRC = ("'self'",)
