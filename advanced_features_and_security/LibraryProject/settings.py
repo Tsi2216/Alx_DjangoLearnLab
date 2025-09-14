@@ -116,7 +116,7 @@ MEDIA_ROOT = BASE_DIR / 'media'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # Custom User Model
-AUTH_USER_MODEL = 'bookshelf.CustomUser' # Corrected path to point to your bookshelf app
+AUTH_USER_MODEL = 'bookshelf.CustomUser'
 
 # --- Security Enhancements ---
 # Secure Cookies: Ensures cookies are only sent over HTTPS.

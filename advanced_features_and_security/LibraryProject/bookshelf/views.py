@@ -19,8 +19,7 @@ def book_list(request):
 def book_create(request):
     """
     View to create a new book. Uses Django Forms for input validation and
-    the ORM for safe database saving, preventing SQL injection and data
-    manipulation vulnerabilities. The {% csrf_token %} tag in the template
+    the ORM for safe database saving. The {% csrf_token %} tag in the template
     protects against CSRF attacks.
     """
     if request.method == "POST":
