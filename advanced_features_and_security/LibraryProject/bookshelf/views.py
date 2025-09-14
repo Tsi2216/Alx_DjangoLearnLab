@@ -7,12 +7,23 @@ from .forms import BookForm, ReviewForm
 @login_required
 @permission_required('your_app.can_view', raise_exception=True)
 def book_list(request):
+    """
+    View to list all books. The query `Book.objects.all()` uses Django's
+    ORM, which protects against SQL injection. No user input is directly
+    used in this query.
+    """
     books = Book.objects.all()
     return render(request, 'your_app/book_list.html', {'books': books})
 
 @login_required
 @permission_required('your_app.can_create', raise_exception=True)
 def book_create(request):
+    """
+    View to create a new book. It uses Django Forms for input validation and
+    the ORM for safe database saving, preventing SQL injection and other
+    data manipulation vulnerabilities. The {% csrf_token %} tag in the
+    template protects against CSRF attacks.
+    """
     if request.method == "POST":
         form = BookForm(request.POST)
         if form.is_valid():
@@ -27,6 +38,11 @@ def book_create(request):
 @login_required
 @permission_required('your_app.can_edit', raise_exception=True)
 def book_edit(request, pk):
+    """
+    View to edit an existing book. Uses `get_object_or_404` to securely
+    retrieve the book by its primary key (pk) and Django Forms to handle
+    the updated data safely.
+    """
     book = get_object_or_404(Book, pk=pk)
     if request.method == "POST":
         form = BookForm(request.POST, instance=book)
@@ -40,6 +56,10 @@ def book_edit(request, pk):
 @login_required
 @permission_required('your_app.can_delete', raise_exception=True)
 def book_delete(request, pk):
+    """
+    View to delete a book. Uses `get_object_or_404` for secure object
+    retrieval. The ORM's `delete()` method is a safe operation.
+    """
     book = get_object_or_404(Book, pk=pk)
     if request.method == 'POST':
         book.delete()
@@ -50,6 +70,10 @@ def book_delete(request, pk):
 @login_required
 @permission_required('your_app.can_create', raise_exception=True)
 def review_create(request, book_pk):
+    """
+    View to create a review. User input for the review is validated and
+    sanitized by Django Forms, protecting against XSS and other attacks.
+    """
     book = get_object_or_404(Book, pk=book_pk)
     if request.method == 'POST':
         form = ReviewForm(request.POST)

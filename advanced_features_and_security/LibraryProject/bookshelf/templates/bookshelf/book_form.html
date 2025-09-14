@@ -1,0 +1,15 @@
+{% extends 'bookshelf/base.html' %}
+
+{% block title %}Add/Edit Book{% endblock %}
+
+{% block page_header %}
+    {% if form.instance.pk %}Edit Book{% else %}Add Book{% endif %}
+{% endblock %}
+
+{% block content %}
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Save</button>
+    </form>
+{% endblock %}

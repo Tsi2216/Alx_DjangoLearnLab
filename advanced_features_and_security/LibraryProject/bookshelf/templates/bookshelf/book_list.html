@@ -1,0 +1,23 @@
+{% extends 'bookshelf/base.html' %}
+
+{% block title %}Book List{% endblock %}
+
+{% block page_header %}Book List{% endblock %}
+
+{% block content %}
+    <p>
+        <a href="{% url 'book_create' %}">Add a New Book</a>
+    </p>
+
+    {% for book in books %}
+        <div class="book-item">
+            <h3>{{ book.title }}</h3>
+            <p>Author: {{ book.author }}</p>
+            <p>Published: {{ book.published_date }}</p>
+            <a href="{% url 'book_edit' book.pk %}">Edit</a> |
+            <a href="{% url 'book_delete' book.pk %}">Delete</a>
+        </div>
+    {% empty %}
+        <p>No books found.</p>
+    {% endfor %}
+{% endblock %}
