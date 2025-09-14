@@ -2,7 +2,7 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required, permission_required
 from .models import Book, Review
-from .forms import BookForm, ReviewForm
+from .forms import BookForm, ReviewForm, ExampleForm   # ✅ Added ExampleForm
 
 @login_required
 @permission_required('bookshelf.can_view', raise_exception=True)
@@ -23,7 +23,6 @@ def book_create(request):
     protects against CSRF attacks.
     """
     if request.method == "POST":
-        # Step 3: Secure Data Access - Django Forms handle validation and sanitization.
         form = BookForm(request.POST)
         if form.is_valid():
             book = form.save(commit=False)
