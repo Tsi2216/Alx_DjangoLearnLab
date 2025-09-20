@@ -1,4 +1,7 @@
-from django.http import JsonResponse
+from rest_framework import generics                  # required for ListAPIView
+from .models import Book                              # your Book model
+from .serializers import BookSerializer               # required serializer
 
-def home(request):
-    return JsonResponse({"message": "Welcome to the API Project"})
+class BookList(generics.ListAPIView):                # the DRF ListAPIView
+    queryset = Book.objects.all()                    # fetch all books
+    serializer_class = BookSerializer                # use BookSerializer
