@@ -1,52 +1,68 @@
-from rest_framework import generics, filters as drf_filters
+from rest_framework import generics, filters
 from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAuthenticated
-from django_filters import rest_framework as filters  # ✅ for filtering
+from django_filters.rest_framework import DjangoFilterBackend, FilterSet, CharFilter, NumberFilter
 from .models import Book, Author
 from .serializers import BookSerializer, AuthorSerializer
 
-
+# -------------------------------
 # ✅ Custom Book Filter
-class BookFilter(filters.FilterSet):
-    title = filters.CharFilter(lookup_expr='icontains')
-    author = filters.CharFilter(field_name='author__name', lookup_expr='icontains')
-    publication_year = filters.NumberFilter()
+# -------------------------------
+class BookFilter(FilterSet):
+    title = CharFilter(lookup_expr='icontains')
+    author = CharFilter(field_name='author__name', lookup_expr='icontains')
+    publication_year = NumberFilter()
 
     class Meta:
         model = Book
         fields = ['title', 'author', 'publication_year']
 
-
-# ✅ List all books + filtering + searching + ordering
-class BookListView(generics.ListCreateAPIView):
+# -------------------------------
+# ✅ Book Views
+# -------------------------------
+# List all books + filtering + searching + ordering
+class BookListView(generics.ListAPIView):
     queryset = Book.objects.all()
     serializer_class = BookSerializer
     permission_classes = [IsAuthenticatedOrReadOnly]
 
-    # Enable filtering, searching, ordering
+    filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_class = BookFilter
     search_fields = ['title', 'author__name']
     ordering_fields = ['title', 'publication_year']
     ordering = ['title']  # default ordering
 
-    # ✅ Correct filter_backends references
-    filter_backends = [filters.DjangoFilterBackend, drf_filters.SearchFilter, drf_filters.OrderingFilter]
-
-
-# ✅ Retrieve, update, delete a single book
-class BookDetailView(generics.RetrieveUpdateDestroyAPIView):
+# Retrieve a single book
+class BookDetailView(generics.RetrieveAPIView):
     queryset = Book.objects.all()
     serializer_class = BookSerializer
     permission_classes = [IsAuthenticatedOrReadOnly]
 
+# Explicit Create, Update, Delete Views
+class CreateView(generics.CreateAPIView):
+    queryset = Book.objects.all()
+    serializer_class = BookSerializer
+    permission_classes = [IsAuthenticatedOrReadOnly]
 
-# ✅ List all authors
+class UpdateView(generics.UpdateAPIView):
+    queryset = Book.objects.all()
+    serializer_class = BookSerializer
+    permission_classes = [IsAuthenticatedOrReadOnly]
+
+class DeleteView(generics.DestroyAPIView):
+    queryset = Book.objects.all()
+    serializer_class = BookSerializer
+    permission_classes = [IsAuthenticatedOrReadOnly]
+
+# -------------------------------
+# ✅ Author Views
+# -------------------------------
+# List all authors
 class AuthorListView(generics.ListCreateAPIView):
     queryset = Author.objects.all()
     serializer_class = AuthorSerializer
     permission_classes = [IsAuthenticated]
 
-
-# ✅ Retrieve, update, delete a single author
+# Retrieve a single author
 class AuthorDetailView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Author.objects.all()
     serializer_class = AuthorSerializer
