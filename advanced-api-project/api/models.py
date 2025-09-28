@@ -1,14 +1,14 @@
 from django.db import models
 
-# Author model -> represents book authors
+# ✅ Author model
 class Author(models.Model):
-    name = models.CharField(max_length=200)
+    name = models.CharField(max_length=100)
 
     def __str__(self):
         return self.name
 
 
-# Book model -> each book is linked to an Author (One-to-Many)
+# ✅ Book model with relationship to Author
 class Book(models.Model):
     title = models.CharField(max_length=200)
     publication_year = models.IntegerField()
