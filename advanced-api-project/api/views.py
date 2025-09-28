@@ -1,6 +1,7 @@
 from rest_framework import generics
 from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAuthenticated
-from django_filters import rest_framework as filters   # ✅ required import
+from django_filters import rest_framework as filters  # ✅ import django_filters
+from rest_framework.filters import OrderingFilter, SearchFilter  # ✅ import DRF filters
 from .models import Book, Author
 from .serializers import BookSerializer, AuthorSerializer
 
@@ -28,8 +29,8 @@ class BookListView(generics.ListCreateAPIView):
     ordering_fields = ['title', 'publication_year']
     ordering = ['title']  # default ordering
 
-    # ✅ Explicitly reference OrderingFilter for the checker
-    filter_backends = [filters.DjangoFilterBackend, filters.OrderingFilter]
+    # ✅ Explicitly reference backends
+    filter_backends = [filters.DjangoFilterBackend, OrderingFilter, SearchFilter]
 
 
 # ✅ Retrieve a single book
