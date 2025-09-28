@@ -1,20 +1,13 @@
-from django.urls import path, include
-from rest_framework.routers import DefaultRouter
-from rest_framework.authtoken.views import obtain_auth_token
-from .views import BookList, BookViewSet
-
-# Create a router and register the BookViewSet for full CRUD
-router = DefaultRouter()
-router.register(r'books_all', BookViewSet, basename='book_all')
+from django.urls import path
+from .views import (
+    BookListView, BookDetailView, BookCreateView,
+    BookUpdateView, BookDeleteView
+)
 
 urlpatterns = [
-    # Existing ListAPIView (optional, still works)
-    path('books/', BookList.as_view(), name='book-list'),
-
-    # Include router URLs for CRUD operations
-    path('', include(router.urls)),
-
-    # Endpoint to obtain auth token
-    path('api-token-auth/', obtain_auth_token, name='api_token_auth'),
+    path('books/', BookListView.as_view(), name='book-list'),               # GET all books
+    path('books/<int:pk>/', BookDetailView.as_view(), name='book-detail'), # GET one book
+    path('books/create/', BookCreateView.as_view(), name='book-create'),   # POST new book
+    path('books/<int:pk>/update/', BookUpdateView.as_view(), name='book-update'),  # PUT/PATCH
+    path('books/<int:pk>/delete/', BookDeleteView.as_view(), name='book-delete'),  # DELETE
 ]
-

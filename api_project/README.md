@@ -1,0 +1,6 @@
+## 📚 API Endpoints (Generic Views)
+- GET `/api/books/` → List all books (public)
+- GET `/api/books/<id>/` → Retrieve single book (public)
+- POST `/api/books/create/` → Create book (auth required)
+- PUT `/api/books/<id>/update/` → Update book (auth required)
+- DELETE `/api/books/<id>/delete/` → Delete book (auth required)
