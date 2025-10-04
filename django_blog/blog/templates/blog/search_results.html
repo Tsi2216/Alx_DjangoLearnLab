@@ -1,0 +1,10 @@
+<!-- blog/templates/blog/search_results.html -->
+{% extends "blog/base.html" %}
+{% block content %}
+  <h1>Search results for "{{ query }}"</h1>
+  {% if posts %}
+    {% include 'blog/post_list.html' %}
+  {% else %}
+    <p>No posts found matching your query.</p>
+  {% endif %}
+{% endblock %}

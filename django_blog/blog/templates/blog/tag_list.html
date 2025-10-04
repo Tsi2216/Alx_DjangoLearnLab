@@ -1,0 +1,12 @@
+<!-- blog/templates/blog/tag_list.html -->
+{% extends "blog/base.html" %}
+{% block content %}
+  <h1>All Tags</h1>
+  <ul>
+    {% for tag in tags %}
+      <li><a href="{% url 'blog:tag-posts' tag.name %}">{{ tag.name }}</a></li>
+    {% empty %}
+      <li>No tags yet.</li>
+    {% endfor %}
+  </ul>
+{% endblock %}

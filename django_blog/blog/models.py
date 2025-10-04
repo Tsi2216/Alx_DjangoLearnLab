@@ -13,13 +13,22 @@ class Profile(models.Model):
     def __str__(self):
         return f"{self.user.username}'s Profile"
 
-
 @receiver(post_save, sender=User)
 def create_or_ensure_profile(sender, instance, created, **kwargs):
     if created:
         Profile.objects.create(user=instance)
     else:
         Profile.objects.get_or_create(user=instance)
+
+
+class Tag(models.Model):
+    name = models.CharField(max_length=50, unique=True)
+
+    class Meta:
+        ordering = ['name']
+
+    def __str__(self):
+        return self.name
 
 
 class Post(models.Model):
@@ -36,6 +45,7 @@ class Post(models.Model):
     updated_date = models.DateTimeField(auto_now=True)
     author = models.ForeignKey(User, on_delete=models.CASCADE, related_name="posts")
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='draft')
+    tags = models.ManyToManyField(Tag, blank=True, related_name='posts')
 
     class Meta:
         ordering = ['-published_date']
@@ -63,7 +73,7 @@ class Comment(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
-        ordering = ['created_at']  # oldest first
+        ordering = ['created_at']
 
     def __str__(self):
         return f"Comment by {self.author.username} on {self.post.title}"

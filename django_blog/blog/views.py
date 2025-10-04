@@ -1,24 +1,22 @@
 # blog/views.py
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
-from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
+from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView, View
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.urls import reverse_lazy, reverse
 from django.http import Http404
 from django.contrib import messages
 from django.contrib.auth import login
 from django.contrib.auth.views import LoginView, LogoutView
+from django.db.models import Q
 
-from .models import Post, Comment
+from .models import Post, Comment, Tag
 from .forms import (
     UserRegistrationForm, UserUpdateForm, ProfileForm,
     PostForm, CommentForm
 )
 
-
-# -------------------
-# Authentication
-# -------------------
+# ------------- Authentication & Profile (same as before) -------------
 def register_view(request):
     if request.user.is_authenticated:
         return redirect('blog:profile')
@@ -35,15 +33,12 @@ def register_view(request):
         form = UserRegistrationForm()
     return render(request, 'blog/register.html', {'form': form})
 
-
 class CustomLoginView(LoginView):
     template_name = 'blog/login.html'
     redirect_authenticated_user = True
 
-
 class CustomLogoutView(LogoutView):
     template_name = 'blog/logout.html'
-
 
 @login_required
 def profile_view(request):
@@ -64,9 +59,7 @@ def profile_view(request):
     return render(request, 'blog/profile.html', {'u_form': u_form, 'p_form': p_form})
 
 
-# -------------------
-# Post CRUD
-# -------------------
+# ------------- Post CRUD & related context -------------
 class PostListView(ListView):
     model = Post
     template_name = 'blog/post_list.html'
@@ -74,8 +67,9 @@ class PostListView(ListView):
     paginate_by = 10
 
     def get_queryset(self):
-        # return published posts only for public listing
-        return Post.objects.filter(status='published')
+        # show only published posts
+        qs = Post.objects.filter(status='published')
+        return qs.select_related('author').prefetch_related('tags')
 
 
 class PostDetailView(DetailView):
@@ -91,7 +85,7 @@ class PostDetailView(DetailView):
 
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
-        ctx['comments'] = self.object.comments.all()
+        ctx['comments'] = self.object.comments.select_related('author').all()
         ctx['comment_form'] = CommentForm()
         return ctx
 
@@ -134,16 +128,62 @@ class PostDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
         return self.request.user == post.author
 
 
-# -------------------
-# Comment CRUD
-# -------------------
+# ------------- Tag list and tag detail -------------
+class TagListView(ListView):
+    model = Tag
+    template_name = 'blog/tag_list.html'
+    context_object_name = 'tags'
+
+
+class TagPostsView(ListView):
+    model = Post
+    template_name = 'blog/post_list.html'  # reuse post list template
+    context_object_name = 'posts'
+    paginate_by = 10
+
+    def get_queryset(self):
+        tag_name = self.kwargs.get('tag_name')
+        tag = get_object_or_404(Tag, name=tag_name)
+        qs = tag.posts.filter(status='published')
+        return qs.select_related('author').prefetch_related('tags')
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        ctx['tag'] = self.kwargs.get('tag_name')
+        return ctx
+
+
+# ------------- Search -------------
+class SearchView(ListView):
+    model = Post
+    template_name = 'blog/search_results.html'
+    context_object_name = 'posts'
+    paginate_by = 10
+
+    def get_queryset(self):
+        q = self.request.GET.get('q', '').strip()
+        if not q:
+            return Post.objects.none()
+        # search title/content and tag names (case-insensitive)
+        qs = Post.objects.filter(
+            Q(status='published') &
+            (Q(title__icontains=q) | Q(content__icontains=q) | Q(tags__name__icontains=q))
+        ).distinct()
+        return qs.select_related('author').prefetch_related('tags')
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        ctx['query'] = self.request.GET.get('q', '')
+        return ctx
+
+
+# ------------- Comment CRUD -------------
 class CommentCreateView(LoginRequiredMixin, CreateView):
     model = Comment
     form_class = CommentForm
     template_name = 'blog/comment_form.html'
 
     def dispatch(self, request, *args, **kwargs):
-        # ensure post exists
         self.post = get_object_or_404(Post, pk=kwargs.get('post_pk'))
         return super().dispatch(request, *args, **kwargs)
 
@@ -179,3 +219,10 @@ class CommentDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
     def test_func(self):
         comment = self.get_object()
         return self.request.user == comment.author
+
+
+# Optional dashboard view (uses login_required decorator)
+@login_required
+def user_dashboard(request):
+    posts = Post.objects.filter(author=request.user)
+    return render(request, 'blog/dashboard.html', {'posts': posts})
