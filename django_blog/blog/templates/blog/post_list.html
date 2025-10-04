@@ -1,16 +1,17 @@
+<!-- blog/templates/blog/post_list.html -->
 {% extends "blog/base.html" %}
 {% block content %}
   <h1>Posts</h1>
   {% if user.is_authenticated %}
-    <p><a href="{% url 'blog:post_create' %}">Create new post</a></p>
+    <p><a href="{% url 'blog:post-create' %}">Create new post</a></p>
   {% endif %}
 
   {% for post in posts %}
     <article>
-      <h2><a href="{% url 'blog:post_detail' post.pk %}">{{ post.title }}</a></h2>
+      <h2><a href="{% url 'blog:post-detail' post.pk %}">{{ post.title }}</a></h2>
       <p>By {{ post.author.username }} — {{ post.published_date|date:"M d, Y" }}</p>
       <p>{{ post.content|truncatechars:200 }}</p>
-      <p><a href="{% url 'blog:post_detail' post.pk %}">Read more</a></p>
+      <p><a href="{% url 'blog:post-detail' post.pk %}">Read more</a></p>
     </article><hr>
   {% empty %}
     <p>No posts yet.</p>

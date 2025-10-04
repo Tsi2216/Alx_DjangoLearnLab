@@ -1,3 +1,4 @@
+# blog/models.py
 from django.db import models
 from django.contrib.auth.models import User
 from django.utils.text import slugify
@@ -12,14 +13,14 @@ class Profile(models.Model):
     def __str__(self):
         return f"{self.user.username}'s Profile"
 
+
 @receiver(post_save, sender=User)
-def create_or_update_user_profile(sender, instance, created, **kwargs):
+def create_or_ensure_profile(sender, instance, created, **kwargs):
     if created:
         Profile.objects.create(user=instance)
     else:
-        # If profile doesn't exist for some reason, ensure it is available
         Profile.objects.get_or_create(user=instance)
-        instance.profile.save()
+
 
 class Post(models.Model):
     STATUS_CHOICES = [
@@ -47,9 +48,22 @@ class Post(models.Model):
             base_slug = slugify(self.title)[:200]
             slug = base_slug
             counter = 1
-            # ensure uniqueness
             while Post.objects.filter(slug=slug).exclude(pk=self.pk).exists():
                 slug = f"{base_slug}-{counter}"
                 counter += 1
             self.slug = slug
         super().save(*args, **kwargs)
+
+
+class Comment(models.Model):
+    post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name='comments')
+    author = models.ForeignKey(User, on_delete=models.CASCADE, related_name='comments')
+    content = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['created_at']  # oldest first
+
+    def __str__(self):
+        return f"Comment by {self.author.username} on {self.post.title}"
