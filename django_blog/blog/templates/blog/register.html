@@ -1,0 +1,18 @@
+{% extends "blog/base.html" %}
+{% load static %}
+{% block content %}
+  <h2>Register</h2>
+  <form method="post" novalidate>
+    {% csrf_token %}
+    {{ form.non_field_errors }}
+    {% for field in form %}
+      <div>
+        {{ field.label_tag }}<br>
+        {{ field }}<br>
+        {{ field.errors }}
+      </div>
+    {% endfor %}
+    <button type="submit">Register</button>
+  </form>
+  <p>Already have an account? <a href="{% url 'blog:login' %}">Login</a></p>
+{% endblock %}
