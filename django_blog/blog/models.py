@@ -1,10 +1,10 @@
-# blog/models.py
 from django.db import models
 from django.contrib.auth.models import User
-from django.utils.text import slugify
 from django.dispatch import receiver
 from django.db.models.signals import post_save
-from taggit.managers import TaggableManager  # ✅ import TaggableManager
+from django.utils.text import slugify
+from taggit.managers import TaggableManager
+
 
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="profile")
@@ -13,6 +13,7 @@ class Profile(models.Model):
 
     def __str__(self):
         return f"{self.user.username}'s Profile"
+
 
 @receiver(post_save, sender=User)
 def create_or_ensure_profile(sender, instance, created, **kwargs):
@@ -36,7 +37,7 @@ class Post(models.Model):
     updated_date = models.DateTimeField(auto_now=True)
     author = models.ForeignKey(User, on_delete=models.CASCADE, related_name="posts")
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='draft')
-    tags = TaggableManager(blank=True)  # ✅ replace old ManyToManyField
+    tags = TaggableManager(blank=True)
 
     class Meta:
         ordering = ['-published_date']
