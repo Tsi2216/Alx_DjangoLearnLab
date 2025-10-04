@@ -1,4 +1,3 @@
-# django_blog/urls.py
 from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
@@ -6,7 +5,7 @@ from django.conf.urls.static import static
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', include('blog.urls', namespace='blog')),  # or choose a prefix
+    path('', include('blog.urls', namespace='blog')),
 ]
 
 if settings.DEBUG:

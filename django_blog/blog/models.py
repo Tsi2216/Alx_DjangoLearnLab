@@ -1,14 +1,9 @@
-# blog/models.py
 from django.db import models
 from django.contrib.auth.models import User
 from django.utils.text import slugify
 from django.dispatch import receiver
 from django.db.models.signals import post_save
 
-
-# -----------------------------
-# PROFILE MODEL
-# -----------------------------
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="profile")
     bio = models.TextField(blank=True)
@@ -17,21 +12,15 @@ class Profile(models.Model):
     def __str__(self):
         return f"{self.user.username}'s Profile"
 
-
-# Automatically create or update Profile whenever a User is created/updated
 @receiver(post_save, sender=User)
 def create_or_update_user_profile(sender, instance, created, **kwargs):
-    # When a new user is created, create a Profile
     if created:
         Profile.objects.create(user=instance)
     else:
-        # When existing user is saved, ensure profile exists and save it
+        # If profile doesn't exist for some reason, ensure it is available
+        Profile.objects.get_or_create(user=instance)
         instance.profile.save()
 
-
-# -----------------------------
-# POST MODEL
-# -----------------------------
 class Post(models.Model):
     STATUS_CHOICES = [
         ('draft', 'Draft'),
@@ -48,13 +37,19 @@ class Post(models.Model):
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='draft')
 
     class Meta:
-        ordering = ['-published_date']  # newest posts first
+        ordering = ['-published_date']
 
     def __str__(self):
         return self.title
 
     def save(self, *args, **kwargs):
-        # Auto-generate slug from title if not provided
         if not self.slug:
-            self.slug = slugify(self.title)
+            base_slug = slugify(self.title)[:200]
+            slug = base_slug
+            counter = 1
+            # ensure uniqueness
+            while Post.objects.filter(slug=slug).exclude(pk=self.pk).exists():
+                slug = f"{base_slug}-{counter}"
+                counter += 1
+            self.slug = slug
         super().save(*args, **kwargs)
