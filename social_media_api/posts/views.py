@@ -2,7 +2,9 @@ from rest_framework import viewsets, permissions, filters, generics
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from django.contrib.auth import get_user_model
+from django.shortcuts import get_object_or_404
 from .models import Post, Comment, Like
+from notifications.models import Notification
 from .serializers import PostSerializer, CommentSerializer
 
 User = get_user_model()
@@ -41,15 +43,24 @@ class PostViewSet(viewsets.ModelViewSet):
     # ----------------------
     @action(detail=True, methods=['post'], permission_classes=[permissions.IsAuthenticated])
     def like(self, request, pk=None):
-        post = self.get_object()
+        post = get_object_or_404(Post, pk=pk)
         like, created = Like.objects.get_or_create(user=request.user, post=post)
         if not created:
             return Response({'detail': 'You have already liked this post.'}, status=400)
+        
+        # Create notification
+        if post.author != request.user:
+            Notification.objects.create(
+                recipient=post.author,
+                actor=request.user,
+                verb='liked your post',
+                target=post
+            )
         return Response({'detail': 'Post liked.'})
 
     @action(detail=True, methods=['post'], permission_classes=[permissions.IsAuthenticated])
     def unlike(self, request, pk=None):
-        post = self.get_object()
+        post = get_object_or_404(Post, pk=pk)
         deleted, _ = Like.objects.filter(user=request.user, post=post).delete()
         if not deleted:
             return Response({'detail': 'You have not liked this post.'}, status=400)
@@ -64,7 +75,16 @@ class CommentViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly]
 
     def perform_create(self, serializer):
-        serializer.save(author=self.request.user)
+        comment = serializer.save(author=self.request.user)
+        # Optional: create notification for post author when a comment is added
+        post_author = comment.post.author
+        if post_author != self.request.user:
+            Notification.objects.create(
+                recipient=post_author,
+                actor=self.request.user,
+                verb='commented on your post',
+                target=comment.post
+            )
 
 # --------------------------
 # Feed View
