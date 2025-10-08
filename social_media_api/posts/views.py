@@ -2,7 +2,7 @@ from rest_framework import viewsets, permissions, filters, generics
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from django.contrib.auth import get_user_model
-from django.shortcuts import get_object_or_404
+from rest_framework.generics import get_object_or_404  # ✅ use generics version
 from .models import Post, Comment, Like
 from notifications.models import Notification
 from .serializers import PostSerializer, CommentSerializer
@@ -43,7 +43,7 @@ class PostViewSet(viewsets.ModelViewSet):
     # ----------------------
     @action(detail=True, methods=['post'], permission_classes=[permissions.IsAuthenticated])
     def like(self, request, pk=None):
-        post = get_object_or_404(Post, pk=pk)
+        post = get_object_or_404(Post, pk=pk)  # ✅ generics.get_object_or_404
         like, created = Like.objects.get_or_create(user=request.user, post=post)
         if not created:
             return Response({'detail': 'You have already liked this post.'}, status=400)
@@ -60,7 +60,7 @@ class PostViewSet(viewsets.ModelViewSet):
 
     @action(detail=True, methods=['post'], permission_classes=[permissions.IsAuthenticated])
     def unlike(self, request, pk=None):
-        post = get_object_or_404(Post, pk=pk)
+        post = get_object_or_404(Post, pk=pk)  # ✅ generics.get_object_or_404
         deleted, _ = Like.objects.filter(user=request.user, post=post).delete()
         if not deleted:
             return Response({'detail': 'You have not liked this post.'}, status=400)
