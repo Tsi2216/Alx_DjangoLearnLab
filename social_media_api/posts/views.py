@@ -7,28 +7,25 @@ class IsOwnerOrReadOnly(permissions.BasePermission):
     Custom permission to allow only owners to edit/delete their objects.
     """
     def has_object_permission(self, request, view, obj):
-        # Read permissions allowed to anyone
+        # Read permissions are allowed for anyone
         if request.method in permissions.SAFE_METHODS:
             return True
-        # Write permissions only for owner
+        # Write permissions are only allowed for the owner of the object
         return obj.author == request.user
 
-
 class PostViewSet(viewsets.ModelViewSet):
+    """ViewSet for managing posts."""
     queryset = Post.objects.all().order_by('-created_at')
     serializer_class = PostSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly]
     filter_backends = [filters.SearchFilter]
-    search_fields = ['title', 'content']  # ✅ search by title or content
+    search_fields = ['title', 'content']  # Search by title or content
 
     def perform_create(self, serializer):
+        """Save the post with the current user as the author."""
         serializer.save(author=self.request.user)
-
 
 class CommentViewSet(viewsets.ModelViewSet):
+    """ViewSet for managing comments."""
     queryset = Comment.objects.all().order_by('-created_at')
-    serializer_class = CommentSerializer
-    permission_classes = [permissions.IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly]
-
-    def perform_create(self, serializer):
-        serializer.save(author=self.request.user)
+    serializer
