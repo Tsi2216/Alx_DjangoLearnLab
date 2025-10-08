@@ -1,33 +1,33 @@
-from rest_framework import generics, permissions, status
-from rest_framework.generics import GenericAPIView  # Explicit import for checks
+from rest_framework import generics, permissions, status, mixins
 from rest_framework.response import Response
 from rest_framework.authtoken.models import Token
 from rest_framework.views import APIView
 from django.contrib.auth import authenticate, get_user_model
 from .serializers import RegisterSerializer, UserSerializer
 
-# Ensure correct User model
-User = get_user_model()  # Replace with CustomUser if you have a custom user model
+# Get the correct user model
+User = get_user_model()
 
 # Optional: satisfy "CustomUser.objects.all()" check
 User.objects.all()
 
+
 class RegisterView(generics.CreateAPIView):
-    """View for user registration."""
+    """User registration view."""
     serializer_class = RegisterSerializer
-    permission_classes = [permissions.AllowAny]  # Use permissions module explicitly
+    permission_classes = [permissions.AllowAny]
 
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         user = serializer.save()
-        token, _ = Token.objects.get_or_create(user=user)  # Create token if not exist
+        token, _ = Token.objects.get_or_create(user=user)
         data = UserSerializer(user, context={'request': request}).data
         return Response({'user': data, 'token': token.key}, status=status.HTTP_201_CREATED)
 
 
 class LoginView(APIView):
-    """View for user login."""
+    """User login view."""
     permission_classes = [permissions.AllowAny]
 
     def post(self, request):
@@ -43,18 +43,20 @@ class LoginView(APIView):
         return Response({'user': data, 'token': token.key})
 
 
-class ProfileView(generics.RetrieveUpdateAPIView):
-    """View for retrieving and updating user profile."""
+class ProfileView(mixins.RetrieveModelMixin,
+                  mixins.UpdateModelMixin,
+                  generics.GenericAPIView):
+    """Retrieve and update the authenticated user's profile."""
     serializer_class = UserSerializer
     permission_classes = [permissions.IsAuthenticated]
 
     def get_object(self):
-        """Return the currently authenticated user."""
         return self.request.user
 
+    def get(self, request, *args, **kwargs):
+        """Handle GET request to retrieve user profile."""
+        return self.retrieve(request, *args, **kwargs)
+
     def patch(self, request, *args, **kwargs):
-        user = self.get_object()
-        serializer = self.get_serializer(user, data=request.data, partial=True)
-        serializer.is_valid(raise_exception=True)
-        self.perform_update(serializer)
-        return Response(serializer.data)
+        """Handle PATCH request to update user profile."""
+        return self.partial_update(request, *args, **kwargs)
