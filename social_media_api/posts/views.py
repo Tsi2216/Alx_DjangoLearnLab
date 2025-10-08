@@ -1,47 +1,80 @@
-from rest_framework import viewsets, permissions, filters
-from .models import Post, Comment
+from rest_framework import viewsets, permissions, filters, generics
+from rest_framework.decorators import action
+from rest_framework.response import Response
+from django.contrib.auth import get_user_model
+from .models import Post, Comment, Like
 from .serializers import PostSerializer, CommentSerializer
 
+User = get_user_model()
+
+# --------------------------
+# Custom Permission
+# --------------------------
 class IsOwnerOrReadOnly(permissions.BasePermission):
-    """
-    Custom permission to allow only owners to edit/delete their objects.
-    """
+    """Only owners can edit/delete objects."""
     def has_object_permission(self, request, view, obj):
-        # Read permissions are allowed for anyone
         if request.method in permissions.SAFE_METHODS:
             return True
-        # Write permissions are only allowed for the owner of the object
         return obj.author == request.user
 
-
+# --------------------------
+# Post ViewSet
+# --------------------------
 class PostViewSet(viewsets.ModelViewSet):
-    """ViewSet for managing posts."""
     serializer_class = PostSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly]
     filter_backends = [filters.SearchFilter]
     search_fields = ['title', 'content']
 
     def get_queryset(self):
-        """Return posts from users the current user is following, or all posts for anonymous users."""
         user = self.request.user
         if user.is_authenticated:
-            # Get users the current user is following
-            following_users = user.following.all()  # Make sure your User model has 'following' ManyToMany
+            following_users = user.following.all()  # Requires following M2M on User
             return Post.objects.filter(author__in=following_users).order_by('-created_at')
-        # For anonymous users, return all posts
         return Post.objects.all().order_by('-created_at')
 
     def perform_create(self, serializer):
-        """Save the post with the current user as the author."""
         serializer.save(author=self.request.user)
 
+    # ----------------------
+    # Like/Unlike actions
+    # ----------------------
+    @action(detail=True, methods=['post'], permission_classes=[permissions.IsAuthenticated])
+    def like(self, request, pk=None):
+        post = self.get_object()
+        like, created = Like.objects.get_or_create(user=request.user, post=post)
+        if not created:
+            return Response({'detail': 'You have already liked this post.'}, status=400)
+        return Response({'detail': 'Post liked.'})
 
+    @action(detail=True, methods=['post'], permission_classes=[permissions.IsAuthenticated])
+    def unlike(self, request, pk=None):
+        post = self.get_object()
+        deleted, _ = Like.objects.filter(user=request.user, post=post).delete()
+        if not deleted:
+            return Response({'detail': 'You have not liked this post.'}, status=400)
+        return Response({'detail': 'Post unliked.'})
+
+# --------------------------
+# Comment ViewSet
+# --------------------------
 class CommentViewSet(viewsets.ModelViewSet):
-    """ViewSet for managing comments."""
     queryset = Comment.objects.all().order_by('-created_at')
     serializer_class = CommentSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly]
 
     def perform_create(self, serializer):
-        """Save the comment with the current user as the author."""
         serializer.save(author=self.request.user)
+
+# --------------------------
+# Feed View
+# --------------------------
+class FeedView(generics.ListAPIView):
+    """Show posts from users the current user is following."""
+    serializer_class = PostSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        user = self.request.user
+        following_users = user.following.all()  # Make sure User model has following M2M
+        return Post.objects.filter(author__in=following_users).order_by('-created_at')
