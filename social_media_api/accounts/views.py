@@ -1,62 +1,40 @@
-from rest_framework import generics, permissions, status, mixins
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-from rest_framework.authtoken.models import Token
-from rest_framework.views import APIView
-from django.contrib.auth import authenticate, get_user_model
-from .serializers import RegisterSerializer, UserSerializer
+from django.contrib.auth import get_user_model
 
-# Get the correct user model
 User = get_user_model()
 
-# Optional: satisfy "CustomUser.objects.all()" check
-User.objects.all()
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def follow_user(request, user_id):
+    """Follow a user by ID."""
+    try:
+        target_user = User.objects.get(id=user_id)
+    except User.DoesNotExist:
+        return Response({'error': 'User not found'}, status=404)
 
+    # Prevent following self
+    if target_user == request.user:
+        return Response({'error': "You cannot follow yourself"}, status=400)
 
-class RegisterView(generics.CreateAPIView):
-    """User registration view."""
-    serializer_class = RegisterSerializer
-    permission_classes = [permissions.AllowAny]
+    # Add target_user to current user's following list
+    request.user.following.add(target_user)
+    return Response({'success': f'You are now following {target_user.username}'})
 
-    def create(self, request, *args, **kwargs):
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        user = serializer.save()
-        token, _ = Token.objects.get_or_create(user=user)
-        data = UserSerializer(user, context={'request': request}).data
-        return Response({'user': data, 'token': token.key}, status=status.HTTP_201_CREATED)
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def unfollow_user(request, user_id):
+    """Unfollow a user by ID."""
+    try:
+        target_user = User.objects.get(id=user_id)
+    except User.DoesNotExist:
+        return Response({'error': 'User not found'}, status=404)
 
+    # Prevent unfollowing self
+    if target_user == request.user:
+        return Response({'error': "You cannot unfollow yourself"}, status=400)
 
-class LoginView(APIView):
-    """User login view."""
-    permission_classes = [permissions.AllowAny]
-
-    def post(self, request):
-        username = request.data.get('username')
-        password = request.data.get('password')
-
-        user = authenticate(username=username, password=password)
-        if not user:
-            return Response({'error': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)
-
-        token, _ = Token.objects.get_or_create(user=user)
-        data = UserSerializer(user, context={'request': request}).data
-        return Response({'user': data, 'token': token.key})
-
-
-class ProfileView(mixins.RetrieveModelMixin,
-                  mixins.UpdateModelMixin,
-                  generics.GenericAPIView):
-    """Retrieve and update the authenticated user's profile."""
-    serializer_class = UserSerializer
-    permission_classes = [permissions.IsAuthenticated]
-
-    def get_object(self):
-        return self.request.user
-
-    def get(self, request, *args, **kwargs):
-        """Handle GET request to retrieve user profile."""
-        return self.retrieve(request, *args, **kwargs)
-
-    def patch(self, request, *args, **kwargs):
-        """Handle PATCH request to update user profile."""
-        return self.partial_update(request, *args, **kwargs)
+    # Remove target_user from current user's following list
+    request.user.following.remove(target_user)
+    return Response({'success': f'You have unfollowed {target_user.username}'})
