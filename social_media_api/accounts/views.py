@@ -6,7 +6,7 @@ from rest_framework.views import APIView
 from django.contrib.auth import authenticate, get_user_model
 from .serializers import RegisterSerializer, UserSerializer
 
-User = get_user_model()
+User = get_user_model()  # Ensure this references the correct user model
 
 class RegisterView(generics.CreateAPIView):
     """View for user registration."""
@@ -14,7 +14,6 @@ class RegisterView(generics.CreateAPIView):
     permission_classes = [AllowAny]
 
     def create(self, request, *args, **kwargs):
-        # Use serializer to create user and token
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         user = serializer.save()
@@ -52,5 +51,4 @@ class ProfileView(generics.RetrieveUpdateAPIView):
         serializer = self.get_serializer(user, data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
         self.perform_update(serializer)
-
         return Response(serializer.data)  # Return updated user data
