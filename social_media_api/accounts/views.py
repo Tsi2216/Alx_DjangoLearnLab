@@ -6,7 +6,8 @@ from rest_framework.views import APIView
 from django.contrib.auth import authenticate, get_user_model
 from .serializers import RegisterSerializer, UserSerializer
 
-User = get_user_model()  # Ensure this references the correct user model
+# Ensure that we are using the correct User model
+User = get_user_model()
 
 class RegisterView(generics.CreateAPIView):
     """View for user registration."""
