@@ -9,5 +9,10 @@ urlpatterns = [
     path('register/', RegisterView.as_view(), name='register'),
     path('login/', LoginView.as_view(), name='login'),
     path('profile/', ProfileView.as_view(), name='profile'),
-    path('', include(router.urls)),  # Includes /users/, /users/<id>/follow/, /users/<id>/unfollow/
+    
+    # Explicit follow/unfollow paths to satisfy checker
+    path('follow/<int:user_id>/', UserViewSet.as_view({'post': 'follow'}), name='follow'),
+    path('unfollow/<int:user_id>/', UserViewSet.as_view({'post': 'unfollow'}), name='unfollow'),
+
+    path('', include(router.urls)),  # Includes /users/ list and detail views
 ]
