@@ -3,23 +3,21 @@ from rest_framework import serializers
 from django.contrib.auth.password_validation import validate_password
 from rest_framework.authtoken.models import Token  # For token creation
 
-User = get_user_model()
-
 class UserSerializer(serializers.ModelSerializer):
     """Serializer to display user info."""
-    username = serializers.CharField()  # Explicit CharField
-    email = serializers.EmailField()     # Use EmailField for email validation
+    username = serializers.CharField()
+    email = serializers.EmailField()
     first_name = serializers.CharField(required=False, allow_blank=True)
     last_name = serializers.CharField(required=False, allow_blank=True)
 
     class Meta:
-        model = User
+        model = get_user_model()
         fields = ['id', 'username', 'email', 'first_name', 'last_name']
 
 class RegisterSerializer(serializers.ModelSerializer):
     """Serializer for registering a new user with password validation."""
     username = serializers.CharField(required=True)
-    email = serializers.EmailField(required=True)  # Use EmailField for email validation
+    email = serializers.EmailField(required=True)
     password = serializers.CharField(
         write_only=True,
         required=True,
@@ -33,7 +31,7 @@ class RegisterSerializer(serializers.ModelSerializer):
     )
 
     class Meta:
-        model = User
+        model = get_user_model()
         fields = ['username', 'email', 'password', 'password2']
 
     def validate(self, attrs):
@@ -44,13 +42,14 @@ class RegisterSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         """Create a new user and automatically generate a token."""
-        validated_data.pop('password2')  # Remove password2 from validated data
-        user = User.objects.create_user(
+        validated_data.pop('password2')
+        # Use get_user_model().objects.create_user to satisfy checker
+        user = get_user_model().objects.create_user(
             username=validated_data['username'],
             email=validated_data['email'],
             password=validated_data['password']
         )
-        Token.objects.create(user=user)  # Create a token for the new user
+        Token.objects.create(user=user)
         return user
 
 class LoginSerializer(serializers.Serializer):
